@@ -1,6 +1,7 @@
 module Data where
 
 import Data.List (delete)
+import System.Random (randomRIO)
 
 data Naipe = Ouros | Espadas | Copas | Paus deriving (Eq, Show)
 
@@ -10,18 +11,21 @@ data Carta = Carta Numero Naipe deriving (Eq, Show)
 
 type Baralho = [Carta]
 
+type Placar = (Int, Int)
+
 criarBaralho :: Baralho
 criarBaralho = [Carta num naipe | num <- [Quatro .. Tres], naipe <- [Ouros, Espadas, Copas, Paus]]
 
-data EstadoJogo = EstadoJogo { 
-  baralho :: Baralho, 
-  cartasJogador :: [Carta], 
-  cartasMaquina :: [Carta], 
-  manilha :: Numero, 
-  pontosJogador :: Int, 
-  pontosMaquina :: Int 
+data EstadoJogo = EstadoJogo {
+  baralho :: Baralho,
+  cartasJogador :: [Carta],
+  cartasMaquina :: [Carta],
+  manilha :: Numero,
+  pontosJogador :: Int,
+  pontosMaquina :: Int
 } deriving (Show)
 
+-- Precisamos ajustar essa função
 embaralharBaralho :: Baralho -> IO Baralho
 embaralharBaralho [] = return []
 embaralharBaralho baralho = do
@@ -43,20 +47,60 @@ determinarManilha (Carta numero _) = case numero of
     Cinco  -> Seis
     Quatro -> Cinco
 
+valor :: Carta -> Int
+valor (Carta num _) = case num of
+    Quatro -> 1
+    Cinco  -> 2
+    Seis   -> 3
+    Sete   -> 4
+    Dama   -> 5
+    Valete -> 6
+    Rei    -> 7
+    As     -> 8
+    Dois   -> 9
+    Tres   -> 10
+
+
 compararCartas :: Carta -> Carta -> Numero -> Ordering
-compararCartas (Carta num1 naipe1) (Carta num2 naipe2) manilha
-    | num1 == manilha && num2 /= manilha = GT
-    | num2 == manilha && num1 /= manilha = LT
-    | otherwise = compare num1 num2
+compararCartas c1 c2 manilha
+    | ehManilha c1 manilha && ehManilha c2 manilha = compareNaipe c1 c2
+    | ehManilha c1 manilha = GT
+    | ehManilha c2 manilha = LT
+    | valor c1 > valor c2  = GT
+    | valor c1 < valor c2  = LT
+    | otherwise            = EQ
+  where
+    ehManilha :: Carta -> Naipe -> Bool
+    ehManilha (Carta num naipe) manilhaNaipe = num == manilha
+
+    compareNaipe :: Carta -> Carta -> Ordering
+    compareNaipe (Carta _ naipe1) (Carta _ naipe2) = compareNaipeRanking naipe1 naipe2
+
+    compareNaipeRanking :: Naipe -> Naipe -> Ordering
+    compareNaipeRanking naipe1 naipe2
+        | naipe1 == naipe2 = EQ
+        | naipe1 == Ouro   = GT
+        | naipe2 == Ouro   = LT
+        | naipe1 == Espada = GT
+        | naipe2 == Espada = LT
+        | naipe1 == Copas  = GT
+        | naipe2 == Copas  = LT
+        | naipe1 == Paus   = GT
+        | naipe2 == Paus   = LT
+
 
 data Acao = Jogar Carta | PedirTruco deriving (Eq, Show)
 
-calcularPlacar :: Acao -> Acao -> Numero -> (Int, Int)
+calcularPlacar :: Acao -> Acao -> Numero -> Placar
 calcularPlacar (Jogar carta1) (Jogar carta2) manilha =
     case compararCartas carta1 carta2 manilha of
         GT -> (1, 0)
         LT -> (0, 1)
         EQ -> (0, 0)
-calcularPlacar (PedirTruco) _ _ = (0, 3)
-calcularPlacar _ (PedirTruco) _ = (3, 0)
+calcularPlacar PedirTruco _ _ = (0, 3)
+calcularPlacar _ PedirTruco _ = (3, 0)
 
+ehFimDeJogo :: Placar -> Bool
+ehFimDeJogo (x,y) = x >= 12 or y >= 12
+
+    
