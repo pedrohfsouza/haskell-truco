@@ -1,40 +1,104 @@
-import Test.QuickCheck
-import Data 
+module Data where
 
--- Testa a função determinarManilha
-prop_determinarManilha :: Carta -> Bool
-prop_determinarManilha (Carta numero _) =
-  case numero of
-    Tres   -> determinarManilha (Carta numero Espadas) == Quatro
-    Dois   -> determinarManilha (Carta numero Espadas) == Tres
-    As     -> determinarManilha (Carta numero Espadas) == Dois
-    Rei    -> determinarManilha (Carta numero Espadas) == As
-    Valete -> determinarManilha (Carta numero Espadas) == Rei
-    Dama   -> determinarManilha (Carta numero Espadas) == Valete
-    Sete   -> determinarManilha (Carta numero Espadas) == Dama
-    Seis   -> determinarManilha (Carta numero Espadas) == Sete
-    Cinco  -> determinarManilha (Carta numero Espadas) == Seis
-    Quatro -> determinarManilha (Carta numero Espadas) == Cinco
+import Data.List (delete)
+import System.Random (randomRIO)
 
--- Testa a função compararCartas
-prop_compararCartas :: Carta -> Carta -> Bool
-prop_compararCartas c1 c2 =
-  compararCartas c1 c2 manilha == compare (valor c1) (valor c2)
+data Naipe = Ouros | Espadas | Copas | Paus deriving (Eq, Show)
+
+data Numero = Quatro | Cinco | Seis | Sete | Dama | Valete | Rei | As | Dois | Tres deriving (Eq, Show, Enum, Ord)
+
+data Carta = Carta Numero Naipe deriving (Eq, Show)
+
+type Baralho = [Carta]
+
+type Placar = (Int, Int)
+
+criarBaralho :: Baralho
+criarBaralho = [Carta num naipe | num <- [Quatro .. Tres], naipe <- [Ouros, Espadas, Copas, Paus]]
+
+data EstadoJogo = EstadoJogo {
+  baralho :: Baralho,
+  cartasJogador :: [Carta],
+  cartasMaquina :: [Carta],
+  manilha :: Numero,
+  pontosJogador :: Int,
+  pontosMaquina :: Int
+} deriving (Show)
+
+-- Precisamos ajustar essa função
+embaralharBaralho :: Baralho -> IO Baralho
+embaralharBaralho [] = return []
+embaralharBaralho baralho = do
+    indice <- randomRIO (0, length baralho - 1)
+    let carta = baralho !! indice
+    resto <- embaralharBaralho (delete carta baralho)
+    return (carta : resto)
+
+determinarManilha :: Carta -> Numero
+determinarManilha (Carta numero _) = case numero of
+    Tres   -> Quatro
+    Dois   -> Tres
+    As     -> Dois
+    Rei    -> As
+    Valete -> Rei
+    Dama   -> Valete
+    Sete   -> Dama
+    Seis   -> Sete
+    Cinco  -> Seis
+    Quatro -> Cinco
+
+valor :: Carta -> Int
+valor (Carta num _) = case num of
+    Quatro -> 1
+    Cinco  -> 2
+    Seis   -> 3
+    Sete   -> 4
+    Dama   -> 5
+    Valete -> 6
+    Rei    -> 7
+    As     -> 8
+    Dois   -> 9
+    Tres   -> 10
+
+
+compararCartas :: Carta -> Carta -> Numero -> Ordering
+compararCartas c1 c2 manilha
+    | ehManilha c1 manilha && ehManilha c2 manilha = compareNaipe c1 c2
+    | ehManilha c1 manilha = GT
+    | ehManilha c2 manilha = LT
+    | valor c1 > valor c2  = GT
+    | valor c1 < valor c2  = LT
+    | otherwise            = EQ
   where
-    manilha = determinarManilha c1
+    ehManilha :: Carta -> Naipe -> Bool
+    ehManilha (Carta num naipe) manilhaNaipe = num == manilha
 
--- Testa a função calcularPlacar
-prop_calcularPlacar :: Carta -> Carta -> Bool
-prop_calcularPlacar c1 c2 =
-  case compararCartas c1 c2 manilha of
-    GT -> calcularPlacar (Jogar c1) (Jogar c2) manilha == (1, 0)
-    LT -> calcularPlacar (Jogar c1) (Jogar c2) manilha == (0, 1)
-    EQ -> calcularPlacar (Jogar c1) (Jogar c2) manilha == (0, 0)
-  where
-    manilha = determinarManilha c1
+    compareNaipe :: Carta -> Carta -> Ordering
+    compareNaipe (Carta _ naipe1) (Carta _ naipe2) = compareNaipeRanking naipe1 naipe2
 
-main :: IO ()
-main = do
-  quickCheck prop_determinarManilha
-  quickCheck prop_compararCartas
-  quickCheck prop_calcularPlacar
+    compareNaipeRanking :: Naipe -> Naipe -> Ordering
+    compareNaipeRanking naipe1 naipe2
+        | naipe1 == naipe2 = EQ
+        | naipe1 == Ouros  = GT
+        | naipe2 == Ouros   = LT
+        | naipe1 == Espadas = GT
+        | naipe2 == Espadas = LT
+        | naipe1 == Copas  = GT
+        | naipe2 == Copas  = LT
+        | naipe1 == Paus   = GT
+        | naipe2 == Paus   = LT
+
+
+data Acao = Jogar Carta | PedirTruco deriving (Eq, Show)
+
+calcularPlacar :: Acao -> Acao -> Numero -> Placar
+calcularPlacar (Jogar carta1) (Jogar carta2) manilha =
+    case compararCartas carta1 carta2 manilha of
+        GT -> (1, 0)
+        LT -> (0, 1)
+        EQ -> (0, 0)
+calcularPlacar PedirTruco _ _ = (0, 3)
+calcularPlacar _ PedirTruco _ = (3, 0)
+
+ehFimDeJogo :: Placar -> Bool
+ehFimDeJogo (x,y) = x >= 12 || y >= 12
