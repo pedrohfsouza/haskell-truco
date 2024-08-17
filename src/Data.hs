@@ -60,6 +60,24 @@ valor (Carta num _) = case num of
     As     -> 8
     Dois   -> 9
     Tres   -> 10
+    
+ehManilha :: Carta -> Numero -> Bool
+ehManilha (Carta num _) manilhaNum = num == manilhaNum
+
+compareNaipe :: Carta -> Carta -> Ordering
+compareNaipe (Carta _ naipe1) (Carta _ naipe2) = compareNaipeRanking naipe1 naipe2
+
+compareNaipeRanking :: Naipe -> Naipe -> Ordering
+compareNaipeRanking naipe1 naipe2
+    | naipe1 == naipe2 = EQ
+    | naipe1 == Ouros  = GT
+    | naipe2 == Ouros  = LT
+    | naipe1 == Espadas = GT
+    | naipe2 == Espadas = LT
+    | naipe1 == Copas  = GT
+    | naipe2 == Copas  = LT
+    | naipe1 == Paus   = GT
+    | naipe2 == Paus   = LT
 
 compararCartas :: Carta -> Carta -> Numero -> Ordering
 compararCartas c1 c2 manilha
@@ -69,24 +87,7 @@ compararCartas c1 c2 manilha
     | valor c1 > valor c2  = GT
     | valor c1 < valor c2  = LT
     | otherwise            = EQ
-  where
-    ehManilha :: Carta -> Numero -> Bool
-    ehManilha (Carta num _) manilhaNum = num == manilhaNum
 
-    compareNaipe :: Carta -> Carta -> Ordering
-    compareNaipe (Carta _ naipe1) (Carta _ naipe2) = compareNaipeRanking naipe1 naipe2
-
-    compareNaipeRanking :: Naipe -> Naipe -> Ordering
-    compareNaipeRanking naipe1 naipe2
-        | naipe1 == naipe2 = EQ
-        | naipe1 == Ouros  = GT
-        | naipe2 == Ouros  = LT
-        | naipe1 == Espadas = GT
-        | naipe2 == Espadas = LT
-        | naipe1 == Copas  = GT
-        | naipe2 == Copas  = LT
-        | naipe1 == Paus   = GT
-        | naipe2 == Paus   = LT
 
 data Acao = Jogar Carta | PedirTruco deriving (Eq, Show)
 
