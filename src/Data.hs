@@ -1,7 +1,7 @@
 module Data where
 
 import Data.List (delete)
-import System.Random (randomRIO)
+--import System.Random (randomRIO)
 import Test.QuickCheck (Arbitrary, arbitrary, elements)
 
 data Naipe = Ouros | Espadas | Copas | Paus deriving (Eq, Show)
@@ -27,13 +27,55 @@ data EstadoJogo = EstadoJogo {
 } deriving (Show)
 
 -- Precisamos ajustar essa função
-embaralharBaralho :: Baralho -> IO Baralho
-embaralharBaralho [] = return []
-embaralharBaralho baralho = do
-    indice <- randomRIO (0, length baralho - 1)
-    let carta = baralho !! indice
-    resto <- embaralharBaralho (delete carta baralho)
-    return (carta : resto)
+--embaralharBaralho :: Baralho -> IO Baralho
+--embaralharBaralho [] = return []
+--embaralharBaralho baralho = do
+--    indice <- randomRIO (0, length baralho - 1)
+--    let carta = baralho !! indice
+--    resto <- embaralharBaralho (delete carta baralho)
+--    return (carta : resto)
+
+printCarta :: Carta -> String
+printCarta (Carta As Espadas) = "🂡"
+printCarta (Carta As Copas) = "🂱"
+printCarta (Carta As Ouros) = "🃁"
+printCarta (Carta As Paus) = "🃑"
+printCarta (Carta Dois Espadas) = "🂢"
+printCarta (Carta Dois Copas) = "🂲"
+printCarta (Carta Dois Ouros) = "🃂"
+printCarta (Carta Dois Paus) = "🃒"
+printCarta (Carta Tres Espadas) = "🂣"
+printCarta (Carta Tres Copas) = "🂳"
+printCarta (Carta Tres Ouros) = "🃃"
+printCarta (Carta Tres Paus) = "🃓"
+printCarta (Carta Quatro Espadas) = "🂤"
+printCarta (Carta Quatro Copas) = "🂴"
+printCarta (Carta Quatro Ouros) = "🃄"
+printCarta (Carta Quatro Paus) = "🃔"
+printCarta (Carta Cinco Espadas) = "🂥"
+printCarta (Carta Cinco Copas) = "🂵"
+printCarta (Carta Cinco Ouros) = "🃅"
+printCarta (Carta Cinco Paus) = "🃕"
+printCarta (Carta Seis Espadas) = "🂦"
+printCarta (Carta Seis Copas) = "🂶"
+printCarta (Carta Seis Ouros) = "🃆"
+printCarta (Carta Seis Paus) = "🃖"
+printCarta (Carta Sete Espadas) = "🂧"
+printCarta (Carta Sete Copas) = "🂷"
+printCarta (Carta Sete Ouros) = "🃇"
+printCarta (Carta Sete Paus) = "🃗"
+printCarta (Carta Dama Espadas) = "🂫"
+printCarta (Carta Dama Copas) = "🂻"
+printCarta (Carta Dama Ouros) = "🃋"
+printCarta (Carta Dama Paus) = "🃛"
+printCarta (Carta Valete Espadas) = "🂮"
+printCarta (Carta Valete Copas) = "🂾"
+printCarta (Carta Valete Ouros) = "🃎"
+printCarta (Carta Valete Paus) = "🃞"
+printCarta (Carta Rei Espadas) = "🂭"
+printCarta (Carta Rei Copas) = "🂽"
+printCarta (Carta Rei Ouros) = "🃍"
+printCarta (Carta Rei Paus) = "🃝"
 
 determinarManilha :: Carta -> Numero
 determinarManilha (Carta numero _) = case numero of
