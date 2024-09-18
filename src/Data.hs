@@ -21,7 +21,9 @@ data EstadoJogo = EstadoJogo {
   cartasMaquina :: [Carta],
   manilha :: Numero,
   pontosJogador :: Int,
-  pontosMaquina :: Int
+  pontosMaquina :: Int,
+  pontosTotaisJogador :: Int,
+  pontosTotaisMaquina :: Int
 } deriving (Show)
 
 criarBaralho :: Baralho
@@ -41,46 +43,46 @@ determinarManilha (Carta numero _) = case numero of
     Quatro -> Cinco
 
 printCarta :: Carta -> String
-printCarta (Carta As Espadas)    = "🂡"
-printCarta (Carta As Copas)      = "🂱"
-printCarta (Carta As Ouros)      = "🃁"
-printCarta (Carta As Paus)       = "🃑"
-printCarta (Carta Dois Espadas)  = "🂢"
-printCarta (Carta Dois Copas)    = "🂲"
-printCarta (Carta Dois Ouros)    = "🃂"
-printCarta (Carta Dois Paus)     = "🃒"
-printCarta (Carta Tres Espadas)  = "🂣"
-printCarta (Carta Tres Copas)    = "🂳"
-printCarta (Carta Tres Ouros)    = "🃃"
-printCarta (Carta Tres Paus)     = "🃓"
-printCarta (Carta Quatro Espadas) = "🂤"
-printCarta (Carta Quatro Copas)   = "🂴"
-printCarta (Carta Quatro Ouros)   = "🃄"
-printCarta (Carta Quatro Paus)    = "🃔"
-printCarta (Carta Cinco Espadas)  = "🂥"
-printCarta (Carta Cinco Copas)    = "🂵"
-printCarta (Carta Cinco Ouros)    = "🃅"
-printCarta (Carta Cinco Paus)     = "🃕"
-printCarta (Carta Seis Espadas)   = "🂦"
-printCarta (Carta Seis Copas)     = "🂶"
-printCarta (Carta Seis Ouros)     = "🃆"
-printCarta (Carta Seis Paus)      = "🃖"
-printCarta (Carta Sete Espadas)   = "🂧"
-printCarta (Carta Sete Copas)     = "🂷"
-printCarta (Carta Sete Ouros)     = "🃇"
-printCarta (Carta Sete Paus)      = "🃗"
-printCarta (Carta Dama Espadas)   = "🂫"
-printCarta (Carta Dama Copas)     = "🂻"
-printCarta (Carta Dama Ouros)     = "🃋"
-printCarta (Carta Dama Paus)      = "🃛"
-printCarta (Carta Valete Espadas) = "🂮"
-printCarta (Carta Valete Copas)   = "🂾"
-printCarta (Carta Valete Ouros)   = "🃎"
-printCarta (Carta Valete Paus)    = "🃞"
-printCarta (Carta Rei Espadas)    = "🂭"
-printCarta (Carta Rei Copas)      = "🂽"
-printCarta (Carta Rei Ouros)      = "🃍"
-printCarta (Carta Rei Paus)       = "🃝"
+printCarta (Carta As Espadas)    = "As Espadas"
+printCarta (Carta As Copas)      = "As Copas"
+printCarta (Carta As Ouros)      = "As Ouros"
+printCarta (Carta As Paus)       = "As Paus"
+printCarta (Carta Dois Espadas)  = "Dois Espadas"
+printCarta (Carta Dois Copas)    = "Dois Copas"
+printCarta (Carta Dois Ouros)    = "Dois Ouros"
+printCarta (Carta Dois Paus)     = "Dois Paus"
+printCarta (Carta Tres Espadas)  = "Tres Espadas"
+printCarta (Carta Tres Copas)    = "Tres Copas"
+printCarta (Carta Tres Ouros)    = "Tres Ouros"
+printCarta (Carta Tres Paus)     = "Tres Paus"
+printCarta (Carta Quatro Espadas) = "Quatro Espadas"
+printCarta (Carta Quatro Copas)   = "Quatro Copas"
+printCarta (Carta Quatro Ouros)   = "Quatro Ouros"
+printCarta (Carta Quatro Paus)    = "Quatro Paus"
+printCarta (Carta Cinco Espadas)  = "Cinco Espadas"
+printCarta (Carta Cinco Copas)    = "Cinco Copas"
+printCarta (Carta Cinco Ouros)    = "Cinco Ouros"
+printCarta (Carta Cinco Paus)     = "Cinco Paus"
+printCarta (Carta Seis Espadas)   = "Seis Espadas"
+printCarta (Carta Seis Copas)     = "Seis Copas"
+printCarta (Carta Seis Ouros)     = "Seis Ouros"
+printCarta (Carta Seis Paus)      = "Seis Paus"
+printCarta (Carta Sete Espadas)   = "Sete Espadas"
+printCarta (Carta Sete Copas)     = "Sete Copas"
+printCarta (Carta Sete Ouros)     = "Sete Ouros"
+printCarta (Carta Sete Paus)      = "Sete Paus"
+printCarta (Carta Dama Espadas)   = "Dama Espadas"
+printCarta (Carta Dama Copas)     = "Dama Copas"
+printCarta (Carta Dama Ouros)     = "Dama Ouros"
+printCarta (Carta Dama Paus)      = "Dama Paus"
+printCarta (Carta Valete Espadas) = "Valete Espadas"
+printCarta (Carta Valete Copas)   = "Valete Copas"
+printCarta (Carta Valete Ouros)   = "Valete Ouros"
+printCarta (Carta Valete Paus)    = "Valete Paus"
+printCarta (Carta Rei Espadas)    = "Rei Espadas"
+printCarta (Carta Rei Copas)      = "Rei Copas"
+printCarta (Carta Rei Ouros)      = "Rei Ouros"
+printCarta (Carta Rei Paus)       = "Rei Paus"
 
 compararCartas :: Carta -> Carta -> Numero -> Ordering
 compararCartas (Carta num1 _) (Carta num2 _) manilha
@@ -115,7 +117,7 @@ calcularPlacar carta1 carta2 manilha =
         EQ -> (1, 1)
 
 ehFimDeJogo :: EstadoJogo -> Bool
-ehFimDeJogo estado = pontosJogador estado >= 12 || pontosMaquina estado >= 12
+ehFimDeJogo estado = pontosTotaisJogador estado >= 12 || pontosTotaisMaquina estado >= 12
 
 -- Função para exibir as cartas do jogador
 mostrarMaoJogador :: [Carta] -> IO ()
@@ -173,8 +175,11 @@ distribuirCartas baralho =
 
 reiniciarRodada :: EstadoJogo -> IO EstadoJogo
 reiniciarRodada estado = do
+    -- Embaralha e distribui cartas
     baralhoNovo <- embaralharBaralho criarBaralho
     let (cartasJogador, cartasMaquina, baralhoRestante) = distribuirCartas baralhoNovo
+
+    -- Passa as informacoes atualizadas para o estado
     return estado {
         baralho = baralhoRestante,
         cartasJogador = cartasJogador,
@@ -183,12 +188,35 @@ reiniciarRodada estado = do
         pontosMaquina = 0
     }
 
+calcularRodada :: EstadoJogo -> IO EstadoJogo
+calcularRodada estado = 
+    if pontosMaquina estado >= 3
+        then do
+            putStrLn "O Vencedor da rodada foi a machina"
+            let novoEstado = estado {
+                pontosTotaisMaquina = pontosTotaisMaquina estado + 1
+            }
+            return novoEstado
+        else do
+            putStrLn "O Vencedor da rodada foi a jogador"
+            let novoEstado = estado {
+                pontosTotaisJogador = pontosTotaisJogador estado + 1
+            }
+            return novoEstado
+
 jogoTruco :: EstadoJogo -> IO ()
 jogoTruco estado = do
     if ehFimDeJogo estado
         then putStrLn "Fim de jogo!"
         else if null (cartasJogador estado) && null (cartasMaquina estado)
-            then putStrLn "Rodada terminada, distribua novas cartas!"
+            then do 
+                putStrLn ""
+                novoEstado <- calcularRodada estado
+                novoEstadoRodada <- reiniciarRodada novoEstado
+                putStrLn $ "O placar e: Jogador " ++ show (pontosTotaisJogador novoEstadoRodada) ++ " x " ++ show (pontosTotaisMaquina novoEstadoRodada) ++ " Machina"
+                putStrLn ""
+                putStrLn "Comecando nova rodada"
+                jogoTruco novoEstadoRodada
             else do
                 putStrLn $ "A manilha é: " ++ show (manilha estado)
                 cartaJogador <- escolherCarta (cartasJogador estado)
@@ -198,19 +226,19 @@ jogoTruco estado = do
                 putStrLn $ "Pontos do Jogador: " ++ show (pontosJogador novoEstado)
                 putStrLn $ "Pontos da Máquina: " ++ show (pontosMaquina novoEstado)
                 
-                if pontosJogador novoEstado >= 2
-                    then do
-                        putStrLn "Você ganhou a rodada! Deseja começar uma nova rodada ou sair do jogo? (Digite 'nova' para nova rodada ou 'sair' para sair)"
-                        opcao <- getLine
-                        case opcao of
-                            "nova" -> do
-                                novoEstadoRodada <- reiniciarRodada novoEstado
-                                jogoTruco novoEstadoRodada
-                            "sair" -> putStrLn "Saindo do jogo. Até mais!"
-                            _      -> do
-                                putStrLn "Opção inválida. Tente novamente."
-                                jogoTruco novoEstado
-                    else jogoTruco novoEstado
+                --if pontosJogador novoEstado >= 3
+                --    then do
+                --        putStrLn "Você ganhou a rodada! Deseja começar uma nova rodada ou sair do jogo? (Digite 'nova' para nova rodada ou 'sair' para sair)"
+                --        opcao <- getLine
+                --        case opcao of
+                --            "nova" -> do
+                --                novoEstadoRodada <- reiniciarRodada novoEstado
+                --                jogoTruco novoEstadoRodada
+                --            "sair" -> putStrLn "Saindo do jogo. Até mais!"
+                --            _      -> do
+                --                putStrLn "Opção inválida. Tente novamente."
+                --                jogoTruco novoEstado
+                jogoTruco novoEstado
 
 -- Função para permitir que o jogador escolha uma carta para jogar
 escolherCarta :: [Carta] -> IO Carta

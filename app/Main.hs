@@ -17,7 +17,9 @@ main = do
             cartasMaquina = take 3 (drop 3 criarBaralho),
             manilha = determinarManilha (criarBaralho !! 6), -- Definir manilha com uma carta qualquer do baralho
             pontosJogador = 0,
-            pontosMaquina = 0
+            pontosMaquina = 0,
+            pontosTotaisJogador = 0,
+            pontosTotaisMaquina = 0
         }
 
     -- Rodar o jogo usando a monad State
