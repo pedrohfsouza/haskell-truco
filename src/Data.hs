@@ -190,9 +190,9 @@ reiniciarRodada estado = do
 
 calcularRodada :: EstadoJogo -> IO EstadoJogo
 calcularRodada estado = 
-    if pontosMaquina estado >= 3
+    if pontosMaquina estado >= 2
         then do
-            putStrLn "O Vencedor da rodada foi a machina"
+            putStrLn "O Vencedor da rodada foi a maquina"
             let novoEstado = estado {
                 pontosTotaisMaquina = pontosTotaisMaquina estado + 1
             }
@@ -213,7 +213,7 @@ jogoTruco estado = do
                 putStrLn ""
                 novoEstado <- calcularRodada estado
                 novoEstadoRodada <- reiniciarRodada novoEstado
-                putStrLn $ "O placar e: Jogador " ++ show (pontosTotaisJogador novoEstadoRodada) ++ " x " ++ show (pontosTotaisMaquina novoEstadoRodada) ++ " Machina"
+                putStrLn $ "O placar e: Jogador " ++ show (pontosTotaisJogador novoEstadoRodada) ++ " x " ++ show (pontosTotaisMaquina novoEstadoRodada) ++ " Maquina"
                 putStrLn ""
                 putStrLn "Comecando nova rodada"
                 jogoTruco novoEstadoRodada
