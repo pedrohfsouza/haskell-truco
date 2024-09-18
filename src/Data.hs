@@ -1,7 +1,10 @@
 module Data where
-    
+
 import Data.List (delete)
 import System.IO
+import Data.List (unfoldr)
+import System.Random (randomRIO, newStdGen, StdGen)
+import System.Random.Shuffle (shuffleM)
 
 data Naipe = Ouros | Espadas | Copas | Paus deriving (Eq, Show)
 
@@ -109,7 +112,7 @@ calcularPlacar carta1 carta2 manilha =
     case compararCartas carta1 carta2 manilha of
         GT -> (1, 0)
         LT -> (0, 1)
-        EQ -> (0, 0)
+        EQ -> (1, 1)
 
 ehFimDeJogo :: EstadoJogo -> Bool
 ehFimDeJogo estado = pontosJogador estado >= 12 || pontosMaquina estado >= 12
@@ -159,33 +162,55 @@ modify f = do
 exec :: State s a -> s -> s
 exec sa s = snd $ runState sa s
 
--- Função para rodar uma rodada e mostrar as cartas ao jogador e da máquina
+embaralharBaralho :: Baralho -> IO Baralho
+embaralharBaralho baralho = shuffleM baralho
+                       
+distribuirCartas :: Baralho -> ([Carta], [Carta], Baralho)
+distribuirCartas baralho =
+    let (cartasJogador, resto1) = splitAt 3 baralho
+        (cartasMaquina, resto2) = splitAt 3 resto1
+    in (cartasJogador, cartasMaquina, resto2)
+
+reiniciarRodada :: EstadoJogo -> IO EstadoJogo
+reiniciarRodada estado = do
+    baralhoNovo <- embaralharBaralho criarBaralho
+    let (cartasJogador, cartasMaquina, baralhoRestante) = distribuirCartas baralhoNovo
+    return estado {
+        baralho = baralhoRestante,
+        cartasJogador = cartasJogador,
+        cartasMaquina = cartasMaquina,
+        pontosJogador = 0,
+        pontosMaquina = 0
+    }
+
 jogoTruco :: EstadoJogo -> IO ()
 jogoTruco estado = do
-    -- Verificar se o jogo terminou
     if ehFimDeJogo estado
         then putStrLn "Fim de jogo!"
-        else do
-
-          -- Mostrar a manilha atual
-            putStrLn $ "A manilha é: " ++ show (manilha estado)
-            
-            -- Jogador escolhe uma carta
-            cartaJogador <- escolherCarta (cartasJogador estado)
-            
-            -- Mostrar a carta da máquina no terminal
-            let cartaMaquina = head (cartasMaquina estado)
-            putStrLn $ "A máquina jogou: " ++ printCarta cartaMaquina
-            
-            -- Executar uma rodada e obter o novo estado
-            let (novoEstado, _) = runState (executarRodada cartaJogador) estado
-            
-            -- Exibir placar
-            putStrLn $ "Pontos do Jogador: " ++ show (pontosJogador novoEstado)
-            putStrLn $ "Pontos da Máquina: " ++ show (pontosMaquina novoEstado)
-            
-            -- Continuar o jogo
-            jogoTruco novoEstado
+        else if null (cartasJogador estado) && null (cartasMaquina estado)
+            then putStrLn "Rodada terminada, distribua novas cartas!"
+            else do
+                putStrLn $ "A manilha é: " ++ show (manilha estado)
+                cartaJogador <- escolherCarta (cartasJogador estado)
+                let cartaMaquina = head (cartasMaquina estado)
+                putStrLn $ "A máquina jogou: " ++ printCarta cartaMaquina
+                let (novoEstado, _) = runState (executarRodada cartaJogador) estado
+                putStrLn $ "Pontos do Jogador: " ++ show (pontosJogador novoEstado)
+                putStrLn $ "Pontos da Máquina: " ++ show (pontosMaquina novoEstado)
+                
+                if pontosJogador novoEstado >= 2
+                    then do
+                        putStrLn "Você ganhou a rodada! Deseja começar uma nova rodada ou sair do jogo? (Digite 'nova' para nova rodada ou 'sair' para sair)"
+                        opcao <- getLine
+                        case opcao of
+                            "nova" -> do
+                                novoEstadoRodada <- reiniciarRodada novoEstado
+                                jogoTruco novoEstadoRodada
+                            "sair" -> putStrLn "Saindo do jogo. Até mais!"
+                            _      -> do
+                                putStrLn "Opção inválida. Tente novamente."
+                                jogoTruco novoEstado
+                    else jogoTruco novoEstado
 
 -- Função para permitir que o jogador escolha uma carta para jogar
 escolherCarta :: [Carta] -> IO Carta
@@ -200,7 +225,7 @@ escolherCarta cartas = do
             putStrLn "Escolha inválida, tente novamente."
             escolherCarta cartas
 
--- Função principal que executa o jogo, alternando entre `State` e `IO`
+-- Função principal que executa o jogo, alternando entre State e IO
 executarRodada :: Carta -> State EstadoJogo EstadoJogo
 executarRodada cartaJogador = do
     estado <- get
@@ -212,13 +237,11 @@ executarRodada cartaJogador = do
     
     -- Atualizar estado
     let novoEstado = estado {
-        cartasJogador = delete cartaJogador (cartasJogador estado),  -- Remover a carta jogada
-        cartasMaquina = tail (cartasMaquina estado),                 -- Remover a carta jogada pela máquina
+        cartasJogador = delete cartaJogador (cartasJogador estado), 
+        cartasMaquina = tail (cartasMaquina estado),                 
         pontosJogador = pontosJogador estado + pontosJogadorAtual,
         pontosMaquina = pontosMaquina estado + pontosMaquinaAtual
     }
     
     put novoEstado
     return novoEstado
-
-
